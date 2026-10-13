@@ -1,0 +1,936 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laptop Deal Finder</title>
+<style>
+:root{--bg:#f6f7f9;--panel:#fff;--text:#1b1f24;--muted:#5d6670;--line:#dde1e6;--accent:#1f6feb;--good:#1a7f37;--warn:#9a6700;--bad:#cf222e;--chip:#eef1f4}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1216;--panel:#171b21;--text:#e6e9ed;--muted:#9aa4af;--line:#2a3038;--accent:#58a6ff;--good:#3fb950;--warn:#d29922;--bad:#f85149;--chip:#222831}}
+:root[data-theme="dark"]{--bg:#0f1216;--panel:#171b21;--text:#e6e9ed;--muted:#9aa4af;--line:#2a3038;--accent:#58a6ff;--good:#3fb950;--warn:#d29922;--bad:#f85149;--chip:#222831}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line)}
+.wrap{max-width:1200px;margin:0 auto;padding:0 16px}
+.top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}
+h1{font-size:18px;margin:0}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{background:none;border:0;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer;font:inherit}
+nav button.on{background:var(--chip);color:var(--text);font-weight:600}
+main{padding:20px 0 60px}
+section{display:none}section.on{display:block}
+h2{font-size:20px;margin:0 0 6px}h3{font-size:16px;margin:18px 0 8px}
+p.lead{color:var(--muted);margin:0 0 16px;max-width:780px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
+input,select,textarea{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit}
+textarea{min-height:70px}
+.f{flex:1 1 180px}
+button.btn{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:9px 14px;font:inherit;font-weight:600;cursor:pointer}
+button.ghost{background:var(--chip);color:var(--text)}
+button.small{padding:5px 10px;font-size:13px}
+.chip{display:inline-block;background:var(--chip);border-radius:999px;padding:2px 10px;font-size:12px;margin:2px 4px 2px 0}
+.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:10px 0}
+.kpi{background:var(--chip);border-radius:8px;padding:8px 10px}
+.kpi b{display:block;font-size:18px}.kpi span{font-size:12px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:13px}
+.tablewrap{overflow-x:auto}
+ul.tight{margin:4px 0;padding-left:18px}ul.tight li{margin:2px 0}
+.empty{text-align:center;padding:40px 16px;color:var(--muted)}
+.note{font-size:13px;color:var(--muted)}
+details summary{cursor:pointer;font-weight:600}
+.deal h3{margin:0 0 4px}
+.src{font-size:12px;color:var(--muted)}
+a{color:var(--accent)}
+/* deal card */
+.quick{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.quick button{border:1px solid var(--line);background:var(--bg);color:var(--text);border-radius:999px;padding:4px 11px;font:inherit;font-size:13px;cursor:pointer}
+.quick button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.understood{font-size:12px;color:var(--muted);margin-top:6px;min-height:1em}
+.rate{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 0;padding:8px 10px;border-radius:8px;background:var(--chip)}
+.rate .stars button{background:none;border:0;padding:0 2px;font-size:22px;line-height:1;cursor:pointer;color:var(--muted)}
+.rate .stars button.on{color:var(--warn)}
+.rate input{flex:1 1 180px;padding:5px 8px}
+.flip{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700;background:var(--chip);margin-left:6px}
+.fixes{font-size:13px;font-weight:600}
+.specs{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:14px;margin:4px 0 2px}
+.specs .cond{background:var(--chip);border-radius:999px;padding:1px 9px;font-size:12px;font-weight:600}
+.desc{margin:4px 0 0;font-size:13px;color:var(--muted);max-width:75ch}
+.cats{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 6px}
+.cats button{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:7px 14px;font:inherit;font-weight:600;cursor:pointer}
+.cats button.on{background:var(--text);color:var(--panel);border-color:var(--text)}
+.cats button span{font-weight:400;opacity:.75;margin-left:4px}
+.buyer{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding:12px 14px}
+.buyer .pic{width:90px;height:70px}
+.buyer h3{margin:0;font-size:15px}
+.needs{margin:8px 0}.needs h4{margin:0 0 4px;font-size:14px}.needs table{font-size:14px}.needs td{padding:5px 8px}.needs .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}.needs .tot td{font-weight:700;border-bottom:0}.needs .note{font-size:12px}
+.official{border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));background:color-mix(in srgb,var(--accent) 9%,var(--panel));border-radius:8px;padding:7px 10px;margin:8px 0;font-size:14px}
+.official .lbl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-right:4px}
+.deal{display:grid;grid-template-columns:180px 1fr;gap:16px;padding:14px}
+.deal .pic{width:180px;height:140px;border-radius:10px;overflow:hidden;background:var(--chip);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;text-align:center}
+.deal .pic img{width:100%;height:100%;object-fit:cover;display:block}
+.deal .body{min-width:0;overflow-wrap:anywhere}
+.src{overflow-wrap:anywhere}
+.deal h3{margin:0 0 2px;font-size:16px;line-height:1.3}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 4px}
+a.act{display:inline-flex;align-items:center;gap:6px;text-decoration:none;border-radius:8px;padding:8px 14px;font-weight:600;font-size:14px;background:var(--chip);color:var(--text)}
+a.act.primary{background:var(--accent);color:#fff}
+a.act.call{background:var(--good);color:#fff}
+.money{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 6px}
+.money div{background:var(--chip);border-radius:8px;padding:8px 10px}
+.money b{display:block;font-size:20px;line-height:1.2}.money span{font-size:12px;color:var(--muted)}
+.money .profit{background:color-mix(in srgb,var(--good) 14%,var(--panel))}
+.money .profit.neg{background:color-mix(in srgb,var(--bad) 14%,var(--panel))}
+.sub{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:13px;color:var(--muted);margin-bottom:8px}
+.sub b{color:var(--text);font-weight:600}
+.msg{border:1px dashed var(--line);border-radius:8px;padding:8px 10px;margin:8px 0;font-size:13px}
+.msg .ka{font-size:13px;margin:2px 0 6px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:8px}
+.two h4{margin:0 0 4px;font-size:14px}
+ul.check{list-style:none;padding:0;margin:4px 0}ul.check li{margin:3px 0;font-size:14px}
+ul.check label{display:flex;gap:8px;align-items:flex-start;color:var(--text);font-size:14px;margin:0}
+ul.check input{width:auto;margin-top:4px}
+.deal details{margin-top:8px;font-size:14px}
+.deal .foot{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
+.deal .foot textarea{min-height:38px;flex:1 1 200px}
+@media (max-width:640px){
+  .deal{grid-template-columns:1fr}
+  .deal .pic{width:100%;height:200px}
+  .money{grid-template-columns:repeat(2,1fr)}
+  .two{grid-template-columns:1fr}
+}
+</style>
+<script src="scan.js"></script>
+</head>
+<body>
+<header><div class="wrap top">
+  <h1>Laptop Deal Finder</h1>
+  <nav id="nav">
+    <button data-s="deals" class="on">Deals</button>
+    <button data-s="calc">Check a listing</button>
+    <button data-s="faults">Fault playbook</button>
+    <button data-s="prices">Prices</button>
+    <button data-s="sources">Where to look</button>
+  </nav>
+</div></header>
+
+<main class="wrap">
+
+<!-- DEALS -->
+<section id="deals" class="on">
+  <h2>Deals to call</h2>
+  <p class="lead">Every listing gets a fault estimate, repair time and cost, the most you should pay, an opening offer and talking points. Listings come straight from the Facebook and website scans.</p>
+  <div class="card">
+    <div class="row">
+      <div class="f" style="flex-basis:100%"><label for="q">Find a flip</label><input id="q" placeholder="e.g. thinkpad screen under 400 tbilisi · 1 fix · no parts · profit 300">
+        <div class="quick" id="quick"></div><div class="understood" id="understood"></div></div>
+      <div class="f"><label for="sort">Sort</label><select id="sort"><option value="flip">Best flip (fewest fixes, top margin)</option><option value="profit">Best profit at asking price</option><option value="roi">Best return %</option><option value="price">Price: low to high</option><option value="priceDesc">Price: high to low</option><option value="resale">Highest resale</option><option value="parts">Cheapest to fix</option></select></div>
+      <div class="f" style="flex-basis:220px"><label for="pmin">Price range (₾)</label><div class="row" style="flex-wrap:nowrap;gap:6px"><input id="pmin" type="number" min="0" placeholder="min"><span>–</span><input id="pmax" type="number" min="0" placeholder="max"></div></div>
+      <div class="f"><label for="fsrc">Source</label><select id="fsrc"><option value="">All sources</option></select></div>
+      <div class="f"><label for="floc">City</label><select id="floc"><option value="">All cities</option></select></div>
+      <div class="f"><label for="fcond">Condition</label><select id="fcond"><option value="">All conditions</option><option value="damaged" selected>Needs a fix</option><option value="working">Working only</option></select></div>
+      <div class="f"><label for="fmine">My reviews</label><select id="fmine"><option value="">All listings</option><option value="reviewed">Only ones I reviewed</option><option value="bought">Only ones I bought</option></select></div>
+      <div class="f"><label for="fs">Status</label><select id="fs"><option value="">All</option></select></div>
+      <div class="f"><label for="fverdict">Verdict</label><select id="fverdict"><option value="">Any verdict</option><option value="good">Good deals only</option><option value="goodwarn">Good or worth calling</option><option value="profit">Profit at asking above 0</option></select></div>
+      <div><label>&nbsp;</label><label style="display:flex;gap:6px;align-items:center;margin:0;color:var(--text)"><input type="checkbox" id="hideMac" checked style="width:auto"> Hide Macs with serious faults</label></div>
+      <div><label>&nbsp;</label><label style="display:flex;gap:6px;align-items:center;margin:0;color:var(--text)"><input type="checkbox" id="hideAgree" checked style="width:auto"> Hide "price by agreement"</label></div>
+      <div><label>&nbsp;</label><span id="importMsg" class="note"></span> <span id="ratingsMsg" class="note"></span></div>
+    </div>
+    <p class="note" style="margin:10px 0 0" id="dataNote"></p>
+  </div>
+  <div class="cats" id="cats" role="tablist"></div>
+  <p class="note" id="catNote"></p>
+  <div id="dealList"></div>
+</section>
+
+<!-- CALCULATOR -->
+<section id="calc">
+  <h2>Check a listing</h2>
+  <p class="lead">Paste a listing you see on mymarket, Facebook or Batumi Bazar. You'll get a verdict, then you can save it to your deals.</p>
+  <div class="card">
+    <div class="row">
+      <div class="f" style="flex-basis:100%"><label>Listing title</label><input id="c_title" placeholder="e.g. Lenovo ThinkPad T490 ეკრანი გატეხილი"></div>
+      <div class="f"><label>Asking price (₾)</label><input id="c_price" type="number"></div>
+      <div class="f"><label>Fault</label><select id="c_fault"></select></div>
+      <div class="f"><label>Resale when fixed (₾), blank = auto</label><input id="c_resale" type="number"></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div class="f"><label>Seller name</label><input id="c_seller"></div>
+      <div class="f"><label>Phone</label><input id="c_phone"></div>
+      <div class="f"><label>Location</label><input id="c_loc" placeholder="Tbilisi, Batumi…"></div>
+      <div class="f"><label>Link</label><input id="c_url"></div>
+      <div class="f"><label>Photo URL</label><input id="c_img"></div>
+      <div class="f"><label>Source</label><select id="c_src"><option>mymarket.ge</option><option>Facebook Marketplace</option><option>Batumi Bazar</option><option>ss.ge</option><option>Other</option></select></div>
+    </div>
+    <div style="margin-top:10px"><label>Description (fault details from the seller)</label><textarea id="c_desc"></textarea></div>
+  </div>
+  <div id="calcOut"></div>
+</section>
+
+<!-- FAULTS -->
+<section id="faults">
+  <h2>Fault playbook</h2>
+  <p class="lead">Repair time, parts cost, tools, knowledge, risk and how to use each fault when bargaining. Costs are my planning estimates in GEL, not live quotes. Check parts prices before each buy.</p>
+  <div class="grid" id="faultGrid"></div>
+  <h3>Tool kit for the full list</h3>
+  <div class="card tablewrap"><table id="toolTable"><thead><tr><th>Tool</th><th>Used for</th><th>Rough cost (₾)</th></tr></thead><tbody></tbody></table></div>
+</section>
+
+<!-- PRICES -->
+<section id="prices">
+  <h2>Prices</h2>
+  <p class="lead">Resale is what a fixed laptop realistically sells for privately. Rows marked <span class="chip">mylaptop.ge</span> come from a Tbilisi refurb shop's prices on 13 Oct 2026, minus 10 to 25%. Rows marked <span class="chip">estimate</span> are my judgement. Official new prices come from Zoommer, EE and Alta on the same day.</p>
+  <div class="official" style="margin-bottom:14px"><span class="lbl">Important</span> Official new prices were taken on 13 Oct 2026 from <a href="https://zoommer.ge/leptopebi-c531" target="_blank" rel="noopener">Zoommer</a>, <a href="https://ee.ge/en/laptops-c58s" target="_blank" rel="noopener">Elit Electronics (EE)</a> and <a href="https://alta.ge/notebooks.html" target="_blank" rel="noopener">Alta</a>. Each deal card shows the new price of the same model, or of the current model in that line when the old one is no longer sold. Buyers compare against these, so a fixed used laptop should sell well below them.</div>
+  <h3>Resale benchmarks (used, working)</h3>
+  <div class="card tablewrap"><table id="resaleTable"><thead><tr><th>Model</th><th>Private resale (₾)</th><th>Basis</th></tr></thead><tbody></tbody></table></div>
+  <h3>Official new prices</h3>
+  <div class="card tablewrap"><table id="newTable"><thead><tr><th>Model</th><th>Spec</th><th>Price (₾)</th><th>Store</th></tr></thead><tbody></tbody></table></div>
+  <h3>Parts</h3>
+  <div class="card tablewrap"><table id="partsTable"><thead><tr><th>Part</th><th>Typical cost (₾)</th></tr></thead><tbody></tbody></table></div>
+</section>
+
+<!-- SOURCES -->
+<section id="sources">
+  <h2>Where to look</h2>
+  <p class="lead">Where damaged laptops come from, and the Georgian words sellers use.</p>
+  <div class="grid">
+    <div class="card"><h3>Places to buy</h3><ul class="tight">
+      <li><a href="https://mymarket.ge/en/products/used/technic/computers/notebook/" target="_blank">mymarket.ge used laptops</a>. About 1,000 used listings out of 2,142. Sort by newest and check twice a day.</li>
+      <li><a href="https://www.facebook.com/marketplace/tbilisi/search?query=%E1%83%9C%E1%83%9D%E1%83%A3%E1%83%97%E1%83%91%E1%83%A3%E1%83%A5%E1%83%98" target="_blank">Facebook Marketplace Tbilisi: ნოუთბუქი</a> and <a href="https://www.facebook.com/marketplace/batumi/search?query=laptop" target="_blank">Batumi: laptop</a></li>
+      <li>Batumi Bazar and other Georgian buy/sell Facebook groups</li>
+      <li>ss.ge classifieds and Telegram electronics channels</li>
+      <li>Repair shops and pawnshops (ლომბარდი): unclaimed or written-off laptops, often 50–200 ₾</li>
+      <li>Companies replacing office laptops (banks, call centres, NGOs): bulk lots</li>
+    </ul></div>
+    <div class="card"><h3>Search words</h3><table>
+      <tr><td>დაზიანებული</td><td>damaged</td></tr>
+      <tr><td>ნაწილებად</td><td>for parts</td></tr>
+      <tr><td>გატეხილი ეკრანი</td><td>broken screen</td></tr>
+      <tr><td>არ ირთვება</td><td>won't turn on</td></tr>
+      <tr><td>დედაპლატა</td><td>motherboard</td></tr>
+      <tr><td>წყალი ჩაესხა / დასველდა</td><td>liquid spill / got wet</td></tr>
+      <tr><td>გამოსწორებას საჭიროებს</td><td>needs repair</td></tr>
+      <tr><td>სასწრაფოდ / იაფად</td><td>urgent / cheap</td></tr>
+    </table></div>
+    <div class="card"><h3>Shops (official prices and refurbs)</h3><ul class="tight">
+      <li><a href="https://zoommer.ge/leptopebi-c531" target="_blank">Zoommer</a></li>
+      <li><a href="https://ee.ge/en/laptops-c58s" target="_blank">Elit Electronics (EE)</a></li>
+      <li><a href="https://alta.ge/notebooks.html" target="_blank">Alta</a></li>
+      <li><a href="https://mylaptop.ge/en/laptops-2/" target="_blank">MyLaptop.ge</a> (used US laptops with warranty). Phone +995 574 73 75 76. This is your resale competition.</li>
+    </ul></div>
+    <div class="card"><h3>Before you pay</h3><ul class="tight">
+      <li>MacBook: get the seller to show it's signed out of iCloud. If it's activation-locked, it's worth parts only.</li>
+      <li>ThinkPad and EliteBook: check for a BIOS or supervisor password.</li>
+      <li>Compare the serial sticker with the manufacturer's site to confirm the real spec.</li>
+      <li>On expensive units, ask for the box or receipt. Walk away from sellers who won't meet.</li>
+      <li>Bring a USB-C PD charger, a bootable USB stick and a multimeter.</li>
+    </ul></div>
+  </div>
+</section>
+</main>
+
+<script>
+// ---------- DATA ----------
+const FAULTS = {
+  screen:{name:"Cracked or broken screen",kw:["ეკრან","screen","display crack","матриц","экран","დისპლე","lcd"],parts:[110,200],partsMac:[350,650],partsGaming:[200,350],hours:[0.5,1.5],risk:"low",
+    tools:["Screwdriver set","Plastic spudgers and picks","Double-sided panel tape"],
+    know:["Match the panel by part number (panelook.com) and connector pins (30 or 40 pin eDP)","Check refresh rate and touch versions before ordering"],
+    test:"Plug in an external monitor over HDMI. If the picture is fine, it's just the panel.",
+    bargain:["A new panel costs 150–350 ₾ plus a wait for shipping","Cracks can hide damage to the cable or backlight, so it may not just be the panel","A buyer would pay a shop 250–450 ₾ to fix it"],
+    sell:["New panel fitted","Tested on an external monitor before the repair"]},
+  nopower:{name:"Won't turn on / dead",kw:["არ ირთვება","ჩართვა","dead","won't turn","not turn","no power","не включ","не вкл","მკვდარი"],parts:[5,60],hours:[1,4],risk:"medium",
+    tools:["Multimeter","Bench power supply with current limit","Hot air station and soldering iron","Microscope or magnifier","Schematics and boardview (OpenBoardView)","Freeze spray or a thermal camera to find shorts"],
+    know:["Power-on sequence: DC-in, charger IC (BQ24xxx / ISL95xxx), 3V/5V always-on rails, EC, then main rails","Finding shorted MOSFETs and caps on VCORE and VIN","BIOS reflash for boot loops (CH341A)"],
+    test:"Check charger draw on the bench PSU. 0 A means DC-in or protection. A short shows high current at low voltage.",
+    bargain:["It could be the CPU or board, so you're buying blind","No diagnosis means you have to price it as parts","Shops charge 80–200 ₾ just to diagnose"],
+    sell:["Board repaired, with stress tests and temperatures shown","New thermal paste fitted during the repair"]},
+  nodisplay:{name:"Turns on, no picture",kw:["გამოსახულება","no display","no image","black screen","შავი ეკრან","нет изображ"],parts:[0,200],hours:[1,3],risk:"medium",
+    tools:["External monitor and HDMI cable","Multimeter","Spare eDP cable","Hot air station"],
+    know:["Isolate panel vs cable vs backlight fuse vs GPU","RAM reseat and CMOS reset fix many no-POST cases","On gaming laptops, check the dGPU rails and MUX"],
+    test:"Try an external monitor, a RAM reseat and a CMOS reset. A backlight fault shows a faint picture under a torch.",
+    bargain:["It could be the GPU, which is expensive","You'd need to test it before you could pay full price"],
+    sell:["Fully tested, picture fixed"]},
+  liquid:{name:"Liquid damage",kw:["წყალ","დასველ","ჩაესხა","liquid","water","spill","coffee","залит","вода"],parts:[10,150],hours:[2,6],risk:"high",
+    tools:["Ultrasonic cleaner","99% isopropyl alcohol","Microscope","Flux, hot air and a fine soldering iron"],
+    know:["Clean corrosion and replace damaged components","Check the keyboard and trackpad, which often die too"],
+    test:"Open it before you buy if possible, and look for green or white corrosion near the power IC and keyboard connector.",
+    bargain:["Liquid damage spreads, and other parts can fail later","The keyboard and battery often need replacing too","Most shops won't take liquid-damaged jobs"],
+    sell:["Board cleaned and repaired, keyboard replaced"]},
+  keyboard:{name:"Keyboard faulty",kw:["კლავიატ","keyboard","клавиат","ღილაკ"],parts:[30,80],hours:[0.5,2],risk:"low",
+    tools:["Screwdrivers","Spudger","Heat gun for riveted keyboards"],
+    know:["Some models have the keyboard riveted to the top case. Order the whole top case (80–200 ₾) or drill out the rivets."],
+    test:"Use an external USB keyboard to confirm the rest works.",
+    bargain:["A new keyboard costs money and shipping takes weeks","Riveted keyboards mean replacing the whole top case"],
+    sell:["New keyboard"]},
+  battery:{name:"Battery dead or swollen",kw:["ბატარე","აკუმულ","battery","аккум","swollen"],parts:[60,150],partsMac:[120,200],hours:[0.3,1],risk:"low",
+    tools:["Screwdrivers","Plastic card and isopropyl for glued batteries"],
+    know:["Order the correct battery part number","Swollen batteries are a fire risk, so handle with care"],
+    test:"Check battery health (powercfg /batteryreport on Windows, System Report on Mac).",
+    bargain:["A new battery is 60–200 ₾","A swollen battery may have damaged the trackpad"],
+    sell:["New battery with 100% health shown"]},
+  hinge:{name:"Hinge or case broken",kw:["ანჯამ","ტეხილი კორპ","hinge","петл","корпус","case broken"],parts:[30,70],hours:[1,2],risk:"low",
+    tools:["Screwdrivers","Two-part epoxy and threaded inserts","Spudger"],
+    know:["Rebuild broken hinge mounts with epoxy and brass inserts","Order the lid or bottom case if it's cracked through"],
+    test:"Open and close it slowly and listen for cracking. Check the display cable isn't pinched.",
+    bargain:["Case parts are hard to find in Georgia","A broken hinge often ends up breaking the screen too"],
+    sell:["Hinges rebuilt, closes solidly"]},
+  overheat:{name:"Overheating or shutting down",kw:["ხურდებ","გადახურ","overheat","shut","перегрев","выключается"],parts:[0,60],hours:[0.7,1.5],risk:"low",
+    tools:["Thermal paste and pads","Fan cleaning brush and compressed air"],
+    know:["Repaste the CPU and GPU and replace the pads on the VRAM and VRMs","Replace the fan if it's noisy"],
+    test:"Run a stress test (HWiNFO plus Cinebench or FurMark) for 10 minutes and watch the temperatures.",
+    bargain:["It might be a dead fan or a failing GPU","It needs a full strip-down to fix"],
+    sell:["Fresh paste and pads, low temperatures shown"]},
+  bios:{name:"BIOS password / corrupted BIOS",kw:["პაროლ","bios","password","пароль","boot loop"],parts:[0,30],hours:[0.5,1.5],risk:"medium",
+    tools:["CH341A programmer and SOIC8 clip (about 30 ₾ once)","Clean BIOS dumps"],
+    know:["Dump, clean and reflash the SPI BIOS","On ThinkPads a supervisor password may sit in the EC or need a chip swap","Only work on laptops you legally own"],
+    test:"Make sure it isn't company-locked (Absolute or Computrace). Ask the seller where it came from.",
+    bargain:["Locked laptops sell mostly for parts","It could be a stolen company laptop"],
+    sell:["BIOS reset, no locks"]},
+  icloud:{name:"MacBook activation lock",kw:["icloud","activation","ლოკ","заблок","apple id"],parts:[0,0],hours:[0,0],risk:"avoid",
+    tools:[],know:["Don't try to bypass it. A locked Mac is worth its parts only (screen, battery, case)."],
+    test:"Ask the seller to sign out of iCloud in front of you.",
+    bargain:["It's worth parts only, so offer parts value"],
+    sell:["Sell it as parts"]},
+  storage:{name:"No storage or OS problems",kw:["ვინჩესტ","ssd","hdd","დისკ","windows","ოპერაციულ","диск"],parts:[70,150],hours:[0.3,1],risk:"low",
+    tools:["Bootable USB (Ventoy)","Spare NVMe or SATA SSD"],
+    know:["Clean Windows install and drivers","Check whether the SSD is NVMe or SATA M.2"],
+    test:"Boot from USB. If it boots, the board is fine.",
+    bargain:["It needs a new SSD and a Windows license"],
+    sell:["New SSD, clean Windows install"]},
+  dcjack:{name:"Not charging / charging port",kw:["დამტენ","იტენება","charging","charge","заряд","port"],parts:[10,40],hours:[0.7,2],risk:"low",
+    tools:["Soldering iron or hot air","Multimeter","USB-C PD tester"],
+    know:["Replace the DC jack or USB-C port","Check the charger IC and the ID pin circuit on Dell and HP"],
+    test:"Try a known good charger first. Often it's only a bad charger.",
+    bargain:["It could be the charging circuit, not just the port"],
+    sell:["New charging port, charger included"]},
+  gpu:{name:"GPU failure (artifacts)",kw:["არტეფაქტ","ვიდეოკარტ","gpu","artifact","видеокарт","ზოლები"],parts:[200,600],hours:[3,6],risk:"high",
+    tools:["BGA rework station","Reballing stencils","Preheater"],
+    know:["Reballing or replacing the GPU. Check for VRAM failure first (it's cheaper)."],
+    test:"Run FurMark and look for artifacts or crashes. Check for artifacts in the BIOS screen too.",
+    bargain:["GPU repair costs 200–600 ₾ and often fails again","Most buyers won't touch it"],
+    sell:["Only sell with a warranty you can honour"]},
+  working:{name:"No fault stated (working)",kw:[],parts:[0,0],hours:[0,0.5],risk:"low",
+    tools:["Cleaning kit"],know:["Check everything works before paying"],
+    test:"Run the full checklist below. Everything must work.",
+    bargain:["It's used, and private buyers pay far below the store price","You have to clean, test and relist it before you earn anything"],
+    sell:["Tested, cleaned, works perfectly"]},
+  unknown:{name:"Unknown or not stated",kw:[],parts:[50,200],hours:[1,4],risk:"medium",
+    tools:["Full kit"],know:["Diagnose before you buy if you can"],
+    test:"Ask for a video of it powering on and booting.",
+    bargain:["The fault isn't known, so you're taking the risk"],
+    sell:["Fully tested"]}
+};
+
+// What each fault needs: [part or job to buy, work to do]
+const NEEDS = {
+  screen:["LCD panel","Fit the new panel, check the eDP cable"],
+  nopower:["Board parts (MOSFETs, ICs, fuses)","Diagnose and repair the power circuit"],
+  nodisplay:["eDP cable, backlight fuse or panel","Find the fault: panel, cable, backlight or GPU"],
+  liquid:["Corroded parts, often the keyboard","Clean the board and replace damaged parts"],
+  keyboard:["Keyboard","Swap the keyboard (top case if riveted)"],
+  battery:["Battery","Fit a new battery"],
+  hinge:["Hinges or case part","Rebuild the hinge mounts"],
+  overheat:["Thermal paste and pads, maybe a fan","Clean and repaste"],
+  bios:["SPI flash chip if needed","Reflash or clear the BIOS"],
+  icloud:["Nothing (parts only)","Strip for parts"],
+  storage:["SSD","Fit an SSD and install Windows"],
+  dcjack:["DC jack or USB-C port","Replace the charging port"],
+  gpu:["GPU chip or reball","Reball or replace the GPU"],
+  working:["Nothing","Clean and test"],
+  unknown:["Unknown until diagnosed","Diagnose before buying"]
+};
+// Things the listing says are missing: [match words, part, low ₾, high ₾]
+const MISSING = [
+ [["დამტენის გარეშე","დამტენი არ აქვს","no charger","without charger","без заряд"],"Charger 65 W",40,80],
+ [["დისკის გარეშე","ვინჩესტერის გარეშე","მყარი დისკის გარეშე","no ssd","no hdd","without ssd","without hdd","без диска","без ssd","без hdd"],"SSD 256 GB",70,90],
+ [["ოპერატიულის გარეშე","ოპერატიული არ აქვს","no ram","without ram","без опер"],"RAM 8 GB",50,70],
+ [["ბატარეის გარეშე","ელემენტის გარეშე","no battery","without battery","без батар","без аккум"],"Battery",60,150],
+ [["ღილაკები აკლია","missing key","keys missing","нет клавиш"],"Keycaps",10,30]
+];
+// Phrases that say something is actually broken (bare words like "screen" or "SSD" are often just specs)
+const PHRASES = {
+  screen:["ეკრანი გატეხ","ეკრანის პრობლემ","გატეხილი ეკრან","ეკრანი დაზიან","ეკრანზე აძვრა","დეფუზორ","broken screen","cracked screen","screen crack","screen broken","screen damaged","screen problem","разбит","трещин","дефузор","экран повреж"],
+  nopower:["არ ირთვება","does not turn on","doesn't turn on","won't turn on","not turning on","no power","не включ"],
+  nodisplay:["არ აქვს გამოსახულება","გამოსახულება არ","შავი ეკრანი","no display","no image","black screen","нет изображ"],
+  liquid:["წყალი ჩაესხა","დასველდა","ჩაესხა","liquid damage","water damage","spilled","залит"],
+  keyboard:["კლავიატურა არ მუშაობ","ღილაკები არ მუშაობ","keyboard not working","keyboard broken","keys not working","клавиатура не работ"],
+  battery:["ბატარეა მკვდარ","ბატარეა არ მუშაობ","ბატარეა სუსტ","ბატარეა არ იჭერს","weak battery","battery is weak","dead battery","battery dead","weak/dead battery","swollen","батарея не держ","аккумулятор не держ","вздут"],
+  hinge:["ანჯამა გატეხ","ანჯამა დაზიან","broken hinge","hinge broken","hinge damaged","петля слом","корпус слом"],
+  overheat:["ხურდება","გადახურ","overheats","overheating","shuts down","turns off by itself","перегрев","выключается"],
+  bios:["bios password","bios პაროლ","пароль bios","boot loop","bios locked"],
+  icloud:["icloud lock","activation lock","icloud-ზეა","заблокирован","apple id lock"],
+  storage:["no ssd","no hdd","დისკის გარეშე","ვინჩესტერის გარეშე","без диска","disk failed","ssd broken"],
+  dcjack:["არ იტენება","not charging","won't charge","doesn't charge","не заряж"],
+  gpu:["არტეფაქტ","artifacts","ზოლები ეკრანზე","видеокарта","ვიდეოკარტა დამწვ","gpu failure"]
+};
+const WORKING = ["არ აქვს არანაირი დეფექტი","მუშაობს გამართულად","იდეალურ მდგომარეობაშია","fully working","works perfectly","no defects","полностью рабочий","всё работает"];
+function guessFaults(text){
+  const t=(text||"").toLowerCase();
+  const found=Object.keys(PHRASES).filter(k=>PHRASES[k].some(w=>t.includes(w.toLowerCase())));
+  if(!found.length && WORKING.some(w=>t.includes(w.toLowerCase()))) return ["working"];
+  return found;
+}
+const MAC_MINOR=["working","battery","storage","keyboard","dcjack","overheat","hinge"]; // Mac faults Dato is happy to take on
+
+const RESALE = [ // [match words, label, low, high, basis]
+ [["elitebook 840 g1"],"HP EliteBook 840 G1",350,420,"mylaptop.ge"],
+ [["elitebook 850 g1"],"HP EliteBook 850 G1",380,450,"mylaptop.ge"],
+ [["elitebook 840 g5","elitebook 840 g6"],"HP EliteBook 840 G5/G6",450,650,"estimate"],
+ [["elitebook 840 g7","elitebook 840 g8"],"HP EliteBook 840 G7/G8",750,1000,"estimate"],
+ [["t490s"],"Lenovo ThinkPad T490s",500,580,"mylaptop.ge"],
+ [["t480"],"Lenovo ThinkPad T480/T480s",450,550,"estimate"],
+ [["t490"],"Lenovo ThinkPad T490",550,650,"estimate"],
+ [["t14 gen 1","t14 g1"],"Lenovo ThinkPad T14 Gen 1",800,900,"estimate"],
+ [["t14 gen 2","t14 g2"],"Lenovo ThinkPad T14 Gen 2",950,1080,"mylaptop.ge"],
+ [["e15 gen 4","e15 g4"],"Lenovo ThinkPad E15 Gen 4",1000,1150,"mylaptop.ge"],
+ [["e14 gen 7","e14 g7"],"Lenovo ThinkPad E14 Gen 7",2000,2200,"mylaptop.ge"],
+ [["x1 carbon"],"Lenovo ThinkPad X1 Carbon (Gen 6–8)",600,950,"estimate"],
+ [["thinkbook 15 g2"],"Lenovo ThinkBook 15 G2",900,1050,"mylaptop.ge"],
+ [["thinkbook 15 g4"],"Lenovo ThinkBook 15 G4",1150,1300,"mylaptop.ge"],
+ [["latitude 5591"],"Dell Latitude 5591",600,700,"mylaptop.ge"],
+ [["latitude 5490","latitude 5480"],"Dell Latitude 5480/5490",400,500,"estimate"],
+ [["latitude 7490","latitude 7480"],"Dell Latitude 7480/7490",450,550,"estimate"],
+ [["hp 250 g7"],"HP 250 G7",550,650,"mylaptop.ge"],
+ [["hp 250 g8"],"HP 250 G8",700,820,"mylaptop.ge"],
+ [["macbook air 2017","air 2017"],"MacBook Air 2017",450,600,"estimate"],
+ [["2012 macbook","macbook pro 2012","macbook pro 15in","2013 macbook","2014 macbook","2015 macbook"],"MacBook Pro 2012–2015",300,500,"estimate"],
+ [["a2337","air m1","macbook air 2020","macbook air m1"],"MacBook Air M1",900,1000,"mylaptop.ge"],
+ [["a2681","air m2","macbook air m2"],"MacBook Air M2",1650,1950,"mylaptop.ge"],
+ [["macbook pro 2017","macbook pro 2018","macbook pro 2019"],"MacBook Pro Intel 2017–2019",500,900,"estimate"],
+ [["rtx 4060"],"Gaming laptop, RTX 4060",2500,3000,"estimate"],
+ [["rtx 4050"],"Gaming laptop, RTX 4050",2100,2500,"estimate"],
+ [["rtx 3060"],"Gaming laptop, RTX 3060",1900,2400,"estimate"],
+ [["rtx 3050"],"Gaming laptop, RTX 3050",1500,1900,"estimate"],
+ [["gtx 1650","gtx1650"],"Gaming laptop, GTX 1650",900,1200,"estimate"],
+ [["tuf a16"],"ASUS TUF Gaming A16",2700,3000,"mylaptop.ge"],
+ [["tuf","nitro","victus","legion","loq","katana","omen","rog"],"Gaming laptop, GPU unknown",1400,2200,"estimate"],
+ [["aspire lite 14"],"Acer Aspire Lite 14 (like new)",900,1100,"estimate"],
+ [["yoga 500","yoga500"],"Lenovo Yoga 500",350,450,"estimate"],
+ [["x554","x555","x540"],"ASUS X554 / X540 (older i3/i5)",300,400,"estimate"],
+ [["thinkpad"],"ThinkPad, model unknown",450,900,"estimate"],
+ [["elitebook","latitude","probook"],"Business laptop, model unknown",400,750,"estimate"],
+ [["macbook"],"MacBook, model unknown",600,1200,"estimate"],
+ [["celeron","pentium","athlon","emmc"],"Entry-level (Celeron/Pentium)",150,300,"estimate"],
+ [["lenovo","asus","acer","hp ","dell","msi","toshiba","samsung"],"Other laptop, model unknown",250,500,"estimate"]
+];
+
+const NEWP = [
+ ["Lenovo V15 G4","Ryzen 5 7520U, 8/512","1,599","Zoommer"],
+ ["Lenovo IdeaPad Slim 3","Core 3-100U, 8/512","1,729","Zoommer"],
+ ["Acer Aspire Lite 14","–","1,499.99","EE"],
+ ["HP 15 BK2X0EA","Ultra 5-225U, 16/1TB","2,499 / 2,399.99","Zoommer / EE"],
+ ["HP EliteBook 660 G11","Core 5 125U, 16/512","2,399.99","EE"],
+ ["Asus ExpertBook 16 P3606","Ultra 5-225H, 16/512","2,899 / 3,299.99","Zoommer / EE"],
+ ["Lenovo ThinkPad E14 / E16","Ryzen AI 5 330, 16/512","3,399","Zoommer"],
+ ["HP EliteBook 8 G1i","Ultra 7-258V, 32/512","3,799","Zoommer"],
+ ["Lenovo ThinkPad T16 G4","Ultra 5-225U, 16/512","3,999","Zoommer"],
+ ["Lenovo ThinkPad T14 G6","Ultra 7-255U, 16/512","4,599","Zoommer"],
+ ["Asus TUF 16 FA607NUQ","RTX 4050","2,999","Zoommer"],
+ ["Asus TUF 17 FX707VJB","RTX 3050","3,099","Zoommer"],
+ ["HP Victus C5HY7EA","–","2,599.99","EE"],
+ ["Lenovo LOQ 15 83JE0189RK","RTX 5050","3,399","Zoommer"],
+ ["Lenovo Legion 5 83F0000DRK","RTX 5050","3,599","Zoommer"],
+ ["Asus TUF 16 FX608JMI","RTX 5060","4,199","Zoommer"],
+ ["Lenovo LOQ 15 83JE018BRK","RTX 5060","4,599 / 4,499.99","Zoommer / EE"],
+ ["HP Omen 16","RTX 5060","4,999","Zoommer"],
+ ["MSI Katana 15 / 17","–","4,999 / 4,799","Alta"],
+ ["Asus ROG Strix G16","RTX 5060","5,199–5,299","Zoommer / Alta"],
+ ["Lenovo Legion 5 OLED","RTX 5070","5,799–6,299","Zoommer"],
+ ["Acer Predator Helios","–","7,999.99","EE"],
+ ["MacBook Neo 13\"","A18 Pro, 8/256","2,349 / 2,509.99","Zoommer / EE"],
+ ["MacBook Air 15\" M5","16/512","5,299 / 5,509.99","Zoommer / EE"],
+ ["MacBook Air 13\" M5","24/1TB","5,899","Zoommer"],
+ ["MacBook Pro 14\"","–","7,369.99","EE"]
+];
+
+const STORES = {Zoommer:"https://zoommer.ge/leptopebi-c531",EE:"https://ee.ge/en/laptops-c58s",Alta:"https://alta.ge/notebooks.html"};
+// Official new price for a listing: same model if still sold, otherwise the current model in that line. [match words, new model, price ₾, stores, same model?]
+const OFFICIAL = [
+ [["v15"],"Lenovo V15 G4",1599,["Zoommer"],true],
+ [["ideapad"],"Lenovo IdeaPad Slim 3",1729,["Zoommer"],false],
+ [["aspire lite 14"],"Acer Aspire Lite 14",1500,["EE"],true],
+ [["aspire"],"Acer Aspire Lite 14",1500,["EE"],false],
+ [["t16"],"Lenovo ThinkPad T16 G4",3999,["Zoommer"],false],
+ [["t14","t490","t480","t470"],"Lenovo ThinkPad T14 G6",4599,["Zoommer"],false],
+ [["e14","e15","e16"],"Lenovo ThinkPad E14 / E16",3399,["Zoommer"],false],
+ [["x1 carbon","thinkpad","thinkbook"],"Lenovo ThinkPad E14 / E16",3399,["Zoommer"],false],
+ [["elitebook 8"],"HP EliteBook 8 G1i",3799,["Zoommer"],false],
+ [["elitebook","probook"],"HP EliteBook 660 G11",2400,["EE"],false],
+ [["hp 250","hp 255","hp 15"],"HP 15 BK2X0EA",2400,["EE","Zoommer"],false],
+ [["expertbook"],"Asus ExpertBook 16 P3606",2899,["Zoommer","EE"],false],
+ [["tuf a16","tuf 16","rtx 4050"],"Asus TUF 16 FA607NUQ (RTX 4050)",2999,["Zoommer"],false],
+ [["tuf"],"Asus TUF 17 FX707VJB (RTX 3050)",3099,["Zoommer"],false],
+ [["victus"],"HP Victus C5HY7EA",2600,["EE"],false],
+ [["loq"],"Lenovo LOQ 15 (RTX 5050)",3399,["Zoommer"],false],
+ [["legion"],"Lenovo Legion 5 (RTX 5050)",3599,["Zoommer"],false],
+ [["omen"],"HP Omen 16 (RTX 5060)",4999,["Zoommer"],false],
+ [["katana"],"MSI Katana 15 / 17",4799,["Alta"],false],
+ [["rog","strix"],"Asus ROG Strix G16 (RTX 5060)",5199,["Zoommer","Alta"],false],
+ [["predator","helios"],"Acer Predator Helios",8000,["EE"],false],
+ [["macbook pro"],"MacBook Pro 14\"",7370,["EE"],false],
+ [["macbook","a2337","a2681"],"MacBook Air 15\" M5 (16/512)",5299,["Zoommer","EE"],false]
+];
+function officialFor(text){
+  const t=(text||"").toLowerCase();
+  for(const o of OFFICIAL){ if(o[0].some(w=>t.includes(w))) return {model:o[1],price:o[2],stores:o[3],same:o[4]}; }
+  return null;
+}
+const rng=(a,b)=>a===b?`${a}`:`${a}–${b}`;
+const storeLinks = st=>st.map(n=>`<a href="${STORES[n]}" target="_blank" rel="noopener">${n}</a>`).join(", ");
+
+const PARTS = [["14\"/15.6\" FHD IPS panel","110–200"],["144 Hz gaming panel","200–350"],["MacBook Air display assembly","350–650"],["Keyboard","30–80"],["Top case with keyboard","80–200"],["Battery (Windows)","60–150"],["Battery (MacBook Air)","120–200"],["NVMe SSD 256 / 512 GB","70–90 / 110–150"],["RAM 8 GB DDR4","50–70"],["Charger 65 W","40–80"],["Hinges","30–70"],["DC jack, MOSFETs, ICs, fuses","2–25"],["Laptop fan","30–60"],["Thermal paste and pads","15–40"]];
+
+const TOOLS = [["Precision screwdriver set + spudgers","Every job","40–80"],["Multimeter","Diagnosis","40–150"],["Bench power supply (current limit)","Finding shorts, power faults","120–250"],["Hot air station + soldering iron","MOSFETs, ICs, ports","150–400"],["Stereo microscope","Board work, liquid damage","200–600"],["CH341A + SOIC8 clip","BIOS reflash","25–40"],["Ultrasonic cleaner","Liquid damage","80–200"],["99% isopropyl alcohol, flux, solder wick","Board work","30–60"],["USB-C PD tester","Charging faults","20–50"],["Spare known-good RAM, SSD, charger, eDP cable","Swap testing","150–300"],["Boardview software + schematics","Board repair","free–subscription"],["BGA rework station","GPU reballing (optional)","1,500+"]];
+
+// ---------- HELPERS ----------
+const $ = s=>document.querySelector(s);
+const LS = {get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const STATUSES = ["New","To call","Called","Offer made","Bought","Skip"];
+const r10 = n=>Math.max(0,Math.round(n/10)*10);
+const esc = s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function guessFault(text){
+  const t=(text||"").toLowerCase();
+  for(const [k,f] of Object.entries(FAULTS)){ if(f.kw.some(w=>t.includes(w))) return k; }
+  return "unknown";
+}
+function guessResale(text){
+  const t=(text||"").toLowerCase();
+  const hit=w=>w.length<=4?new RegExp("(^|[^a-z0-9])"+w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"($|[^a-z0-9])").test(t):t.includes(w);
+  for(const r of RESALE){ if(r[0].some(hit)) return {label:r[1],low:r[2],high:r[3],basis:r[4]}; }
+  return null;
+}
+function partsFor(fk,text){
+  const f=FAULTS[fk], t=(text||"").toLowerCase();
+  if(/macbook|a2337|a2681/.test(t)&&f.partsMac) return f.partsMac;
+  if(/rtx|gtx|tuf|legion|nitro|victus|omen|rog|katana|loq|gaming/.test(t)&&f.partsGaming) return f.partsGaming;
+  return f.parts;
+}
+function evaluate(l){
+  const text=[l.title,l.model,l.fault,l.description].join(" ");
+  const lt=text.toLowerCase();
+  let fks=guessFaults(text);
+  if(l.fault&&FAULTS[l.fault]&&!fks.includes(l.fault)) fks.unshift(l.fault);
+  if(fks.length>1) fks=fks.filter(k=>k!=="working");
+  if(!fks.length) fks=["unknown"];
+  const RANK={avoid:4,high:3,medium:2,low:1};
+  fks.sort((a,b)=>RANK[FAULTS[b].risk]-RANK[FAULTS[a].risk]||partsFor(b,text)[1]-partsFor(a,text)[1]);
+  const fk=fks[0], f=FAULTS[fk];
+  const g=guessResale(text);
+  const resale = Number(l.resale)|| (g? Math.round((g.low+g.high)/2):0);
+  const needs=[...fks.map(k=>{const [lo,hi]=partsFor(k,text);return {part:NEEDS[k][0],work:NEEDS[k][1],fault:FAULTS[k].name,lo,hi}}),
+    ...MISSING.filter(m=>m[0].some(w=>lt.includes(w))).map(m=>({part:m[1],work:"Missing from the listing",fault:"Missing",lo:m[2],hi:m[3]}))];
+  const pl=needs.reduce((a,n)=>a+n.lo,0), ph=needs.reduce((a,n)=>a+n.hi,0), parts=(pl+ph)/2;
+  const hours=[fks.reduce((a,k)=>a+FAULTS[k].hours[0],0),fks.reduce((a,k)=>a+FAULTS[k].hours[1],0)];
+  const price=Number(l.price)||0;
+  let maxBuy = fk==="icloud" ? r10(resale*0.25) : r10(resale*0.65 - parts - 50);
+  const opening = price ? r10(Math.min(maxBuy*0.75, price*0.7)) : r10(maxBuy*0.6);
+  const target = r10((opening+maxBuy)/2);
+  const profitAsk = resale - price - parts;
+  const profitTarget = resale - target - parts;
+  const roi = price? profitAsk/(price+parts):0;
+  const isMac=/macbook|a2337|a2681|a1466|a1932|a2179|a2338|imac/.test(text.toLowerCase());
+  const macSerious=isMac && fks.some(k=>!MAC_MINOR.includes(k));
+  let verdict, cls;
+  if(macSerious){verdict="Skip: MacBook with a serious fault (outside your focus)";cls="bad"}
+  else if(!price){verdict=resale?`Price by agreement. Ask the seller, and pay at most ${maxBuy} ₾.`:"Price by agreement. Ask the seller.";cls="warn"}
+  else if(!resale){verdict="Set a resale price to judge this one";cls="warn"}
+  else if(f.risk==="avoid"){verdict="Parts only. Pay parts value or skip.";cls="bad"}
+  else if(price<=maxBuy){verdict="Good deal at the asking price";cls="good"}
+  else if(price<=maxBuy*1.3){verdict="Worth calling, but negotiate down";cls="warn"}
+  else {verdict="Too expensive unless the seller drops a lot";cls="bad"}
+  const off=Number(l.new_price)?{model:l.model||"this model",price:Number(l.new_price),stores:[],same:true,src:l.price_source||""}:officialFor(text);
+  return {fks,needs,hours,off,isMac,macSerious,fk,f,g,resale,parts,pl,ph,price,maxBuy,opening,target,profitAsk,profitTarget,roi,verdict,cls};
+}
+
+const ONSITE = [
+ "It boots to Windows or the BIOS. No BIOS or supervisor password.",
+ "Serial sticker matches the model. Look up the real spec on the maker's site.",
+ "Screen: dead pixels, lines, backlight bleed, pressure marks.",
+ "Every key and the trackpad (type in Notepad, click both buttons).",
+ "USB ports, HDMI, audio, webcam, Wi-Fi.",
+ "It charges with its own charger. Check battery health.",
+ "Hinges, case cracks and missing screws (signs of an earlier repair).",
+ "Liquid marks or corrosion smell around the keyboard and ports."
+];
+const MAC_ONSITE = "Seller signs out of iCloud and turns off Find My in front of you.";
+const imgOf = l=>l.image||l.photo||l.img||l.picture||"";
+// Photos saved by the scans: photos/<source>-<listing id>.jpg, e.g. photos/fb-2179761653425169.jpg
+function localPhoto(l){
+  const m=String(l.url||"").match(/(\d{5,})(?!.*\d{5,})/); if(!m) return "";
+  const src=(l.source||"").toLowerCase();
+  const pre=/facebook/.test(src)||/facebook\.com/.test(l.url)?"fb":(src.match(/[a-z]+/)||["web"])[0];
+  return `photos/${pre}-${m[1]}.jpg`;
+}
+function picHTML(l,cls){
+  const list=[localPhoto(l),imgOf(l)].filter(Boolean);
+  if(!list.length) return `<div class="${cls}">No photo</div>`;
+  const next=list.slice(1).map(u=>esc(u)).join("|");
+  return `<a class="${cls}" href="${esc(l.url||list[0])}" target="_blank" rel="noopener"><img src="${esc(list[0])}" data-next="${next}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="nextPic(this)"></a>`;
+}
+function nextPic(img){
+  const rest=(img.dataset.next||"").split("|").filter(Boolean);
+  if(rest.length){img.dataset.next=rest.slice(1).join("|");img.src=rest[0]}
+  else img.parentElement.innerHTML="No photo";
+}
+const isFB = l=>/facebook|fb\.com/i.test((l.source||"")+" "+(l.url||""));
+function sellerHTML(sv){
+  const m=String(sv||"").match(/^(.*?)\s*\((https?:\/\/[^)]+)\)\s*$/);
+  return m?`<a href="${esc(m[2])}" target="_blank" rel="noopener">${esc(m[1])}</a>`:esc(sv);
+}
+function telOf(p){
+  let d=String(p||"").replace(/[^\d+]/g,"");
+  if(/^5\d{8}$/.test(d)) d="+995"+d;
+  else if(/^995\d{9}$/.test(d)) d="+"+d;
+  return d;
+}
+function bargainPoints(l,e){
+  const pts=[];
+  if(e.resale&&e.price>e.maxBuy) pts.push(`The asking price is ${e.price-e.maxBuy} ₾ above the most you should pay.`);
+  if(e.resale) pts.push(`Fixed, it sells for about ${e.resale} ₾, and parts cost ${rng(e.pl,e.ph)} ₾ before any work.`);
+  e.fks.forEach(k=>pts.push(...FAULTS[k].bargain));
+  if(e.needs.some(n=>n.fault==="Missing")) pts.push(`Parts are missing (${e.needs.filter(n=>n.fault==="Missing").map(n=>n.part).join(", ")}), and you have to buy them.`);
+  pts.push("You pay cash and collect today, so the seller is done with it.");
+  return pts;
+}
+function kaMessage(e){
+  const offer = e.opening||e.target;
+  return `გამარჯობა! ლეპტოპი ისევ იყიდება? ${offer} ლარად ავიღებდი, ნაღდით, დღესვე.`;
+}
+function copyText(btn){
+  const t=btn.parentElement.querySelector(".ka").textContent;
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>{btn.textContent="Copied";setTimeout(()=>btn.textContent="Copy",1500)}).catch(()=>{const r=document.createRange();r.selectNodeContents(btn.parentElement.querySelector(".ka"));const sel=getSelection();sel.removeAllRanges();sel.addRange(r);btn.textContent="Selected, copy it"});
+}
+function setCheck(i,k,v){const c={...(deals[i].checks||{})};c[k]=v;deals[i].checks=c;setMeta(deals[i],"checks",c)}
+
+function dealHTML(l,e,idx,score){
+  const statusSel = idx==null?"":`<select onchange="setField(${idx},'status',this.value)" style="width:auto">${STATUSES.map(s=>`<option ${s===(l.status||"New")?"selected":""}>${s}</option>`).join("")}</select>`;
+  const img=imgOf(l), tel=telOf(l.phone);
+  const pic = picHTML(l,"pic");
+  const checks = l.checks||{};
+  const ftests=e.fks.map(k=>FAULTS[k].test);
+  const onsite = [...ftests, ...(e.isMac?[MAC_ONSITE]:[]), ...ONSITE];
+  const checkList = onsite.map((t,k)=>`<li><label><input type="checkbox" ${checks[k]?"checked":""} ${idx!=null?`onchange="setCheck(${idx},${k},this.checked)"`:""}><span>${k<ftests.length?"<b>"+t+"</b>":t}</span></label></li>`).join("");
+  return `<div class="card deal">
+  ${pic}
+  <div class="body">
+    <h3>${esc(l.title)}</h3>
+    <div class="src">${esc(l.source||"")}${l.location?" · "+esc(l.location):""}${l.seller?" · "+sellerHTML(l.seller):""}</div>
+    ${l.model||l.specs||l.condition?`<div class="specs">${l.condition?`<span class="cond">${esc(l.condition)}</span>`:""}${l.model?`<b>${esc(l.model)}</b>`:""}${l.specs?`<span>${esc(l.specs)}</span>`:""}</div>`:""}
+    ${l.description?`<p class="desc">${esc(l.description).slice(0,320)}${l.description.length>320?"…":""}</p>`:""}
+    <div class="actions">
+      ${l.url?`<a class="act primary" href="${esc(l.url)}" target="_blank" rel="noopener">Open offer ↗</a>`:""}
+      ${tel?`<a class="act call" href="tel:${esc(tel)}">Call ${esc(l.phone)}</a>`:""}
+      ${!l.url&&!tel?`<span class="note">No link or phone in this listing</span>`:""}
+    </div>
+    ${e.off?`<div class="official"><span class="lbl">Official new price</span> <b>${e.off.price.toLocaleString("en-US")} ₾</b> · ${esc(e.off.model)}${e.off.same?"":" <span class=\"note\">(current model in this line, not the same laptop)</span>"}${e.off.stores.length?" · "+storeLinks(e.off.stores):""}${e.off.src?` · <span class="note">${esc(e.off.src)}</span>`:""}${e.price?` · <b>asking is ${Math.round(e.price/e.off.price*100)}% of new</b>`:""}</div>`:`<div class="official"><span class="lbl">Official new price</span> <span class="note">Not collected for this brand yet. Check <a href="${STORES.Zoommer}" target="_blank" rel="noopener">Zoommer</a>, <a href="${STORES.EE}" target="_blank" rel="noopener">EE</a>, <a href="${STORES.Alta}" target="_blank" rel="noopener">Alta</a>.</span></div>`}
+    <div class="${e.cls}" style="font-weight:600">${e.verdict}${(()=>{const fi=fixInfo(e);return ` <span class="flip">${fi.n===0?(e.fks[0]==="working"?"No fix needed":"Fault unknown"):fi.n===1?"1 fix":fi.n+" fixes"}${fi.labourOnly?" · no parts, your skill":""}</span>`})()}${score!=null&&score>-1e5?`<span class="flip" title="Flip score: margin, minus extra fixes and risk, plus your ratings">Score ${score}</span>`:""}</div>
+    <div class="money">
+      <div>${e.price?`<b>${e.price} ₾</b><span>Asking</span>`:`<b style="font-size:16px">By agreement</b><span>No price given</span>`}</div>
+      <div><b>${e.resale||"–"} ₾</b><span>Resale when fixed</span></div>
+      <div><b>${Math.round(e.parts)} ₾</b><span>Parts and fixes (${rng(e.pl,e.ph)} ₾)</span></div>
+      ${e.price?`<div class="profit ${e.profitAsk>0?"":"neg"}"><b class="${e.profitAsk>0?"good":"bad"}">${Math.round(e.profitAsk)} ₾</b><span>Profit at asking</span></div>`:`<div class="profit"><b class="good">${Math.round(e.profitTarget)} ₾</b><span>Profit if you pay ${e.target} ₾</span></div>`}
+    </div>
+    <div class="sub">
+      <span>Open with <b>${e.opening} ₾</b></span>
+      <span>Target <b>${e.target} ₾</b></span>
+      <span>Walk away above <b>${e.maxBuy} ₾</b></span>
+      <span>Profit at target <b>${Math.round(e.profitTarget)} ₾</b></span>
+      <span>Repair <b>${e.hours[0]}–${e.hours[1]} h</b></span>
+      <span>Risk <b>${e.f.risk}</b></span>
+      <span>Faults <b>${e.fks.map(k=>esc(FAULTS[k].name)).join(", ")}</b></span>
+      ${l.price_source?`<span>Price source <b>${esc(l.price_source)}</b>${Number(l.used_price)?` (used ${esc(l.used_price)} ₾)`:""}</span>`:Number(l.resale)?`<span>Resale basis <b>scan estimate</b></span>`:e.g?`<span>Resale basis <b>${esc(e.g.label)}, ${e.g.basis}</b></span>`:""}
+      ${e.isMac?`<span><b>MacBook${e.macSerious?", serious fault":", minor fault, OK"}</b></span>`:""}
+    </div>
+    <div class="needs"><h4>What it needs</h4><table>${e.needs.map(n=>`<tr><td><b>${esc(n.part)}</b><div class="note">${esc(n.fault)}: ${esc(n.work)}</div></td><td class="num">${rng(n.lo,n.hi)} ₾</td></tr>`).join("")}<tr class="tot"><td>Total parts</td><td class="num">${rng(e.pl,e.ph)} ₾</td></tr></table></div>
+    ${isFB(l)?`<div class="msg"><span class="note">Facebook message to send</span><div class="ka" lang="ka">${kaMessage(e)}</div><button class="btn ghost small" onclick="copyText(this)">Copy</button></div>`:""}
+    <div class="two">
+      <div><h4>Bargain points</h4><ul class="tight">${bargainPoints(l,e).map(b=>`<li>${b}</li>`).join("")}</ul></div>
+      <div><h4>Check on the spot</h4><ul class="check">${checkList}</ul></div>
+    </div>
+    <details><summary>Full listing text, repair notes, selling points</summary>
+      ${l.description&&l.description.length>320?`<p class="note">${esc(l.description)}</p>`:""}
+      <b>Tools and knowledge</b><ul class="tight">${[...e.f.tools.slice(0,3),...e.f.know.slice(0,2)].map(b=>`<li>${b}</li>`).join("")}</ul>
+      <b>Selling points after the fix</b><ul class="tight">${e.f.sell.map(b=>`<li>${b}</li>`).join("")}</ul>
+    </details>
+    ${idx!=null?(()=>{const r=RATINGS[rkey(l)]||{};return `<div class="rate"><b class="fixes">Your rating</b><span class="stars">${[1,2,3,4,5].map(n=>`<button type="button" aria-label="${n} star${n>1?"s":""}" class="${(r.rating||0)>=n?"on":""}" onclick="rate(${idx},${n},this)">★</button>`).join("")}</span><input placeholder="Why? (helps me learn what you like)" value="${esc(r.note||"")}" oninput="rateNote(${idx},this.value)" onchange="flushSaves()"></div>`})():""}
+    ${idx!=null?`<div class="foot">${statusSel}<textarea placeholder="Notes" oninput="setField(${idx},'notes',this.value)" onchange="flushSaves()">${esc(l.notes||"")}</textarea><button class="btn ghost small" onclick="delDeal(${idx},this)">Hide</button></div>`:""}
+  </div>
+</div>`;
+}
+
+// ---------- DEALS ----------
+
+let deals = [];
+let META = LS.get("meta",{});           // your status, notes, checks and hidden flags, per listing
+let SERVER = false;                     // true when opened through serve.py on your PC
+// Notes save as you type: kept in the browser at once, written to the files on your PC after a short pause,
+// when you leave the box, and when the page closes, so nothing you type is cut off.
+const pending={};
+function later(name,fn){clearTimeout((pending[name]||{}).t);pending[name]={fn,t:setTimeout(()=>{delete pending[name];fn()},700)}}
+function flushSaves(beacon){Object.keys(pending).forEach(n=>{const p=pending[n];clearTimeout(p.t);delete pending[n];p.fn(beacon)})}
+addEventListener("pagehide",()=>flushSaves(true));
+addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")flushSaves(true)});
+function post(url,type,body,beacon){
+  if(beacon&&navigator.sendBeacon&&navigator.sendBeacon(url,new Blob([body],{type}))) return Promise.resolve({ok:true});
+  return fetch(url,{method:"POST",headers:{"Content-Type":type},body,keepalive:body.length<60000});
+}
+function save(){LS.set("meta",META); if(SERVER) later("meta",b=>post("api/meta","application/json",JSON.stringify(META),b).catch(()=>{}))}
+function setMeta(l,k,v){const key=rkey(l);META[key]={...(META[key]||{}),[k]:v};save()}
+function setField(i,k,v){deals[i][k]=v;setMeta(deals[i],k,v);if(k==="status")renderDeals(true)}
+function delDeal(i,btn){if(btn&&btn.dataset.arm!=="1"){btn.dataset.arm="1";btn.textContent="Tap again to hide";setTimeout(()=>{btn.dataset.arm="";btn.textContent="Hide"},3000);return}setMeta(deals[i],"hidden",true);deals.splice(i,1);renderDeals()}
+const CATS = {
+  sale:{name:"For sale",note:"Laptops sold as a whole. This is your main list."},
+  parts:{name:"For parts",note:"Posts selling a laptop for parts (იშლება / ნაწილებად). Useful for donor parts."},
+  buyer:{name:"Buyers (sell to them)",note:"Shops and people who buy laptops (ჩაბარება). Your last resort for selling something you can't fix."}
+};
+const BUYER_WORDS=["შევიძენ","ვიყიდი","ჩავიბარებ","ჩაბარება","ვყიდულობთ","ვიბარებთ","ჩავიბარებთ","ვყიდულობ","we buy","buying laptops","скупка","куплю","покупаем","выкуп"];
+const PARTS_WORDS=["იშლება","ნაწილებად იყიდება","იყიდება ნაწილებად","ნაწილები იყიდება","selling parts","parted out","разбор","продаю запчасти"];
+function catOf(l){
+  if(BUYER_WORDS.some(w=>String(l.title||"").toLowerCase().includes(w))) return "buyer";
+  const c=(l.category||"").toLowerCase().trim();
+  if(CATS[c]) return c;
+  const t=[l.title,l.description].join(" ").toLowerCase();
+  if(BUYER_WORDS.some(w=>t.includes(w))) return "buyer";
+  if(PARTS_WORDS.some(w=>t.includes(w))) return "parts";
+  return "sale";
+}
+const cityOf = l=>String(l.location||"").split(",")[0].trim();
+let curCat = LS.get("cat","sale"); if(!CATS[curCat]) curCat="sale";
+function setCat(c){curCat=c;shown=PAGE;LS.set("cat",c);renderDeals()}
+function fillSelect(id,vals,label){const el=$(id),cur=el.value;el.innerHTML=`<option value="">${label}</option>`+[...new Set(vals.filter(Boolean))].sort().map(v=>`<option ${v===cur?"selected":""}>${esc(v)}</option>`).join("")}
+function buyerHTML(l,idx){
+  const img=imgOf(l), tel=telOf(l.phone);
+  return `<div class="card buyer">${picHTML(l,"pic")}
+  <div style="flex:1 1 240px;min-width:0"><h3>${esc(l.title)}</h3><div class="src">${esc(l.source||"")}${l.location?" · "+esc(l.location):""}${l.seller?" · "+sellerHTML(l.seller):""}${l.price?` · offers about ${esc(l.price)} ₾`:""}</div></div>
+  <div class="actions" style="margin:0">${l.url?`<a class="act primary" href="${esc(l.url)}" target="_blank" rel="noopener">Open post ↗</a>`:""}${tel?`<a class="act call" href="tel:${esc(tel)}">Call ${esc(l.phone)}</a>`:""}
+  <button class="btn ghost small" onclick="delDeal(${idx},this)">Hide</button></div></div>`;
+}
+// ---------- RATINGS ----------
+// Saved in this browser, in the online page's shared store, and (on your PC) in deal-finder/ratings.csv
+function hashStr(t){let h=5381;for(const c of String(t))h=((h<<5)+h+c.charCodeAt(0))|0;return (h>>>0).toString(36)}
+const rkey = l=>{if(l.key)return l.key;const lp=localPhoto(l);return lp?lp.slice(7,-4):"h"+hashStr(l.url||l.title)};
+let RATINGS = LS.get("ratings",{});
+let ratingsDb=null;
+function ratingsCSV(){
+  const cols=["key","url","title","model","fault","price","rating","note","rated_at"];
+  const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
+  return [cols.join(",")].concat(Object.entries(RATINGS).map(([k,r])=>[k,r.url,r.title,r.model,r.fault,r.price,r.rating,r.note,r.at].map(q).join(","))).join("\n")+"\n";
+}
+function writeRatingsFile(){
+  if(!SERVER) return;
+  later("ratings",async b=>{try{const r=await post("api/ratings","text/csv",ratingsCSV(),b);if(!r.ok)throw 0}
+    catch(e){$("#dataNote").textContent="Couldn't save ratings to ratings.csv. Is serve.py still running?"}});
+}
+function rate(i,stars,btn){
+  const l=deals[i], k=rkey(l), e=evaluate(l), old=RATINGS[k]||{};
+  const r={url:l.url||"",title:l.title||"",model:l.model||"",fault:e.fks.join(";"),price:l.price||"",rating:stars===old.rating?0:stars,note:old.note||"",at:new Date().toISOString()};
+  saveRating(k,r);
+  // Light up the stars where they are; the list re-ranks only when you change a filter or refresh
+  if(btn) btn.parentElement.querySelectorAll("button").forEach((b,n)=>b.classList.toggle("on",n<r.rating));
+}
+function rateNote(i,note){const l=deals[i],k=rkey(l),old=RATINGS[k];if(!old&&!note.trim())return;const e=evaluate(l);saveRating(k,{rating:0,model:l.model||"",fault:e.fks.join(";"),price:l.price||"",...old,url:l.url||"",title:l.title||"",note,at:new Date().toISOString()})}
+function saveRating(k,r){
+  if(!r.rating&&!r.note) delete RATINGS[k]; else RATINGS[k]=r;
+  LS.set("ratings",RATINGS); writeRatingsFile();
+  if(ratingsDb) later("db:"+k,()=>{const d=ratingsDb.collection("ratings").doc(k);(RATINGS[k]?d.set(RATINGS[k]):d.delete()).catch(()=>{})});
+}
+(async()=>{try{
+  const db=await window.claude?.use?.("db"); if(!db) return; ratingsDb=db;
+  db.collection("ratings").onSnapshot(snap=>{
+    let changed=false;
+    snap.docChanges().forEach(ch=>{ if(ch.type==="removed"){delete RATINGS[ch.doc.id]} else {RATINGS[ch.doc.id]=ch.doc.data()} changed=true; });
+    if(changed){LS.set("ratings",RATINGS);renderDeals(true)}
+  },()=>{});
+}catch(e){}})();
+
+// ---------- FLIP SCORE ----------
+// Your category: component or labour fixes, as few as possible, with the highest margin
+const COMPONENT=["nopower","dcjack","nodisplay","bios","overheat","storage"];
+function fixInfo(e){
+  const fixes=e.fks.filter(k=>k!=="working"&&k!=="unknown");
+  const missing=e.needs.filter(n=>n.fault==="Missing").length;
+  const labourOnly=fixes.length>0&&fixes.every(k=>COMPONENT.includes(k))&&missing===0;
+  return {n:fixes.length+missing,labourOnly};
+}
+function learned(e){ // what your ratings say about this kind of offer
+  const rs=Object.values(RATINGS).filter(r=>r.rating&&r.fault&&r.fault.split(";")[0]===e.fks[0]);
+  return rs.length? rs.reduce((a,r)=>a+r.rating,0)/rs.length : 0;
+}
+function flipScore(l,e){
+  if(!e.resale) return -1e6;
+  const fi=fixInfo(e), margin=e.price?e.profitAsk:e.profitTarget;
+  let s=margin;
+  s-=Math.max(0,fi.n-1)*120;
+  s-={low:0,medium:60,high:220,avoid:1000}[e.f.risk]||0;
+  if(fi.labourOnly) s+=120;
+  if(e.fks[0]==="working") s-=150;
+  if(e.fks[0]==="unknown") s-=120;
+  const r=(RATINGS[rkey(l)]||{}).rating; if(r) s+=(r-3)*200;
+  const avg=learned(e); if(avg) s+=(avg-3)*60;
+  return Math.round(s);
+}
+
+// ---------- SMART SEARCH ----------
+const QFAULT={screen:["screen","ეკრან","экран","display crack"],nopower:["dead","no power","power","ირთვება","не включ"],nodisplay:["no display","no image","black screen"],battery:["battery","ბატარე","аккум","батар"],keyboard:["keyboard","კლავიატ","клавиат"],liquid:["liquid","water","წყალ"],dcjack:["charging","charger","charge","დამტენ","იტენ"],gpu:["gpu","artifact","ვიდეოკარტ"],bios:["bios","password","პაროლ"],hinge:["hinge","ანჯამ","case"],overheat:["overheat","hot","ხურდ"],storage:["ssd","hdd","storage"]};
+const QCITY=["tbilisi","batumi","rustavi","kutaisi","zugdidi","gori","telavi","poti","ozurgeti"];
+const QUICK=[["1 fix","1 fix"],["No parts needed","no parts"],["Under 300 ₾","under 300"],["Under 500 ₾","under 500"],["Profit 300+","profit 300"],["Screen","screen"],["Won't turn on","dead"],["Charging","charging"],["Gaming","gaming"],["ThinkPad","thinkpad"],["Has phone","phone"],["Tbilisi","tbilisi"],["Batumi","batumi"],["Rated 4+","rated"],["Not rated","unrated"]];
+function parseQuery(raw){
+  let t=" "+raw.toLowerCase().replace(/₾|gel|ლარ[ი]?/g," ")+" ";
+  const f={words:[],faults:[],said:[]};
+  const take=(re,fn)=>{t=t.replace(re,(...m)=>{fn(m);return " "})};
+  take(/(\d+)\s*[-–]\s*(\d+)/g,m=>{f.pmin=+m[1];f.pmax=+m[2];f.said.push(`${m[1]}–${m[2]} ₾`)});
+  take(/(?:under|below|max|up to|<|до|მდე)\s*(\d+)/g,m=>{f.pmax=+m[1];f.said.push(`under ${m[1]} ₾`)});
+  take(/(\d+)\s*(?:მდე)/g,m=>{f.pmax=+m[1];f.said.push(`under ${m[1]} ₾`)});
+  take(/(?:over|above|min|from|>|от)\s*(\d+)/g,m=>{f.pmin=+m[1];f.said.push(`over ${m[1]} ₾`)});
+  take(/(?:profit|margin|მოგება)\s*(\d+)\+?|(\d+)\+?\s*(?:profit|margin)/g,m=>{f.minProfit=+(m[1]||m[2]);f.said.push(`profit ${f.minProfit}+ ₾`)});
+  take(/\b(?:1|one|single)\s*fix(?:es)?\b/g,()=>{f.maxFix=1;f.said.push("one fix")});
+  take(/\b(?:2|two)\s*fix(?:es)?\b/g,()=>{f.maxFix=2;f.said.push("up to two fixes")});
+  take(/\b(?:no parts|labou?r|component|manual|easy)\b/g,()=>{f.labour=true;f.said.push("no parts needed")});
+  take(/\bunrated\b/g,()=>{f.unrated=true;f.said.push("not rated yet")});
+  take(/\brated\b|★\s*4|4\s*★/g,()=>{f.rated=4;f.said.push("rated 4+")});
+  take(/\bphone\b/g,()=>{f.phone=true;f.said.push("has a phone")});
+  take(/\bgaming\b/g,()=>{f.gaming=true;f.said.push("gaming")});
+  for(const c of QCITY) take(new RegExp("\\b"+c+"\\b","g"),()=>{f.city=c;f.said.push(c[0].toUpperCase()+c.slice(1))});
+  for(const [k,ws] of Object.entries(QFAULT)) for(const w of ws){ if(t.includes(w)){ t=t.split(w).join(" "); if(!f.faults.includes(k)){f.faults.push(k);f.said.push(FAULTS[k].name.toLowerCase())} } }
+  f.words=t.split(/\s+/).filter(w=>w.length>1);
+  if(f.words.length) f.said.push(`text: ${f.words.join(" ")}`);
+  return f;
+}
+function matchQuery(x,f){
+  const e=x.e,l=x.l,p=e.price;
+  if(f.pmin!=null&&!(p>=f.pmin)) return false;
+  if(f.pmax!=null&&!(p&&p<=f.pmax)) return false;
+  if(f.minProfit!=null&&!((p?e.profitAsk:e.profitTarget)>=f.minProfit)) return false;
+  const fi=fixInfo(e);
+  if(f.maxFix!=null&&!(fi.n>=1&&fi.n<=f.maxFix)) return false;
+  if(f.labour&&!fi.labourOnly) return false;
+  if(f.faults.length&&!f.faults.every(k=>e.fks.includes(k))) return false;
+  const r=(RATINGS[rkey(l)]||{}).rating||0;
+  if(f.rated&&r<f.rated) return false;
+  if(f.unrated&&r) return false;
+  if(f.phone&&!telOf(l.phone)) return false;
+  const hay=[l.title,l.model,l.specs,l.description,l.location,l.seller,l.source,e.g&&e.g.label].join(" ").toLowerCase();
+  if(f.gaming&&!/rtx|gtx|gaming|tuf|legion|nitro|victus|omen|rog|katana|loq|predator|alienware|msi/.test(hay)) return false;
+  if(f.city&&!hay.includes(f.city)&&!String(l.location||"").toLowerCase().includes(f.city)) return false;
+  return f.words.every(w=>hay.includes(w));
+}
+function renderQuick(){
+  const q=$("#q").value.toLowerCase();
+  $("#quick").innerHTML=QUICK.map(([lab,tok])=>`<button type="button" class="${q.includes(tok)?"on":""}" onclick="toggleQuick('${tok}')">${lab}</button>`).join("");
+}
+function toggleQuick(tok){const el=$("#q");let v=el.value;v=v.toLowerCase().includes(tok)?v.replace(new RegExp(tok,"i"),"").replace(/\s+/g," ").trim():(v+" "+tok).trim();el.value=v;shown=PAGE;renderDeals()}
+
+const PAGE=40; let shown=PAGE;
+function showMore(){shown+=PAGE;renderDeals()}
+let lastOrder=null;
+function renderDeals(keep){
+  const qf=parseQuery($("#q").value), fs=$("#fs").value, sort=$("#sort").value;
+  renderQuick(); $("#understood").textContent=qf.said.length?"Looking for: "+qf.said.join(" · "):"";
+  const pmin=Number($("#pmin").value)||0, pmax=Number($("#pmax").value)||Infinity;
+  const fsrc=$("#fsrc").value, floc=$("#floc").value, fv=$("#fverdict").value, fmine=$("#fmine").value;
+  // "My reviews" shows what you rated, wrote notes on or gave a status, from every list, whatever the other filters say
+  const mine=l=>fmine==="bought"?l.status==="Bought":(l.status&&l.status!=="New")||(l.notes||"").trim()||RATINGS[rkey(l)];
+  fillSelect("#fsrc",deals.map(l=>l.source),"All sources");
+  fillSelect("#floc",deals.map(cityOf),"All cities");
+  const all=deals.map((l,i)=>({l,i,c:catOf(l)}));
+  const counts={}; Object.keys(CATS).forEach(k=>counts[k]=all.filter(x=>x.c===k).length);
+  $("#cats").innerHTML=Object.entries(CATS).map(([k,c])=>`<button role="tab" class="${k===curCat?"on":""}" onclick="setCat('${k}')">${c.name}<span>${counts[k]}</span></button>`).join("");
+  $("#catNote").textContent=CATS[curCat].note;
+  let items=all.filter(x=>fmine?mine(x.l):x.c===curCat).map(x=>({...x,e:evaluate(x.l)}))
+    .filter(x=>!fs||(x.l.status||"New")===fs)
+    .filter(x=>{const c=$("#fcond").value;return fmine||!c||(c==="working"?x.e.fks[0]==="working":x.e.fks[0]!=="working")})
+    .filter(x=>!fsrc||x.l.source===fsrc)
+    .filter(x=>!floc||cityOf(x.l)===floc)
+    .filter(x=>{const p=Number(x.l.price)||0;return p>=pmin&&p<=pmax})
+    .filter(x=>!fv||(fv==="good"?x.e.cls==="good":fv==="goodwarn"?x.e.cls!=="bad":x.e.profitAsk>0))
+    .filter(x=>fmine||curCat==="buyer"||!($("#hideMac").checked&&x.e.macSerious))
+    .filter(x=>fmine||curCat==="buyer"||!($("#hideAgree").checked&&!x.e.price))
+    .filter(x=>matchQuery(x,qf));
+  items.forEach(x=>x.score=flipScore(x.l,x.e));
+  const S={price:(a,b)=>a.e.price-b.e.price,priceDesc:(a,b)=>b.e.price-a.e.price,roi:(a,b)=>b.e.roi-a.e.roi,resale:(a,b)=>b.e.resale-a.e.resale,parts:(a,b)=>a.e.parts-b.e.parts,profit:(a,b)=>b.e.profitAsk-a.e.profitAsk,flip:(a,b)=>b.score-a.score};
+  items.sort((a,b)=>(sort!=="flip"&&((!a.e.price)-(!b.e.price)))||(S[sort]||S.flip)(a,b));
+  if(keep&&lastOrder){const pos=new Map(lastOrder.map((l,n)=>[l,n]));const at=x=>pos.has(x.l)?pos.get(x.l):1e9;items.sort((a,b)=>at(a)-at(b))} // stay in place after a rating or status change
+  lastOrder=items.map(x=>x.l);
+  const filtered = all.filter(x=>x.c===curCat).length;
+  const total=items.length; items=items.slice(0,shown);
+  $("#catNote").textContent=(fmine?"Your reviewed listings from every list.":CATS[curCat].note)+` Showing ${items.length} of ${total}.`;
+  $("#dealList").innerHTML = items.length? items.map(x=>curCat==="buyer"?buyerHTML(x.l,x.i):dealHTML(x.l,x.e,x.i,x.score)).join("")+(total>items.length?`<div style="text-align:center;margin:8px 0 20px"><button class="btn ghost" onclick="showMore()">Show ${Math.min(PAGE,total-items.length)} more</button></div>`:"") :
+   filtered ? `<div class="card empty"><b>Nothing matches these filters.</b><br>${filtered} listing${filtered>1?"s are":" is"} in this list. Widen the price range or clear the filters.</div>` :
+   deals.length ? `<div class="card empty"><b>No listings in this list yet.</b></div>` :
+   `<div class="card empty"><b>No listings yet.</b><br>The scans haven't saved any listings into deal-finder yet. You can add one by hand in <a href="#" onclick="show('calc');return false">Check a listing</a>.</div>`;
+}
+$("#fs").innerHTML += STATUSES.map(s=>`<option>${s}</option>`).join("");
+["#q","#fs","#sort","#hideMac","#pmin","#pmax","#fsrc","#floc","#fverdict","#fcond","#hideAgree","#fmine"].forEach(s=>$(s).addEventListener("input",()=>{shown=PAGE;renderDeals()}));
+
+function parseCSV(txt){
+  const rows=[];let row=[],cur="",q=false;
+  for(let i=0;i<txt.length;i++){const c=txt[i];
+    if(q){if(c=='"'){if(txt[i+1]=='"'){cur+='"';i++}else q=false}else cur+=c}
+    else if(c=='"')q=true; else if(c==','){row.push(cur);cur=""} else if(c=='\n'){row.push(cur);rows.push(row);row=[];cur=""} else if(c!='\r')cur+=c;}
+  if(cur||row.length){row.push(cur);rows.push(row)}
+  const h=rows.shift().map(x=>x.trim().toLowerCase());
+  return rows.filter(r=>r.some(x=>x.trim())).map(r=>Object.fromEntries(h.map((k,i)=>[k,(r[i]||"").trim()])));
+}
+// ---------- CALCULATOR ----------
+$("#c_fault").innerHTML=`<option value="">Auto-detect from text</option>`+Object.entries(FAULTS).map(([k,f])=>`<option value="${k}">${f.name}</option>`).join("");
+function calcListing(){return{title:$("#c_title").value,price:$("#c_price").value,fault:$("#c_fault").value,resale:$("#c_resale").value,seller:$("#c_seller").value,phone:$("#c_phone").value,location:$("#c_loc").value,url:$("#c_url").value,source:$("#c_src").value,image:$("#c_img").value,description:$("#c_desc").value}}
+function renderCalc(){
+  const l=calcListing();
+  if(!l.title&&!l.price){$("#calcOut").innerHTML="";return}
+  $("#calcOut").innerHTML=dealHTML(l,evaluate(l),null)+`<button class="btn" onclick="saveCalc()">Save to deals</button>`;
+}
+function saveCalc(){const l=calcListing();l.status="To call";l.manual=1;const m=LS.get("manual",[]);m.push(l);LS.set("manual",m);deals.push(l);renderDeals();show("deals")}
+document.querySelectorAll("#calc input,#calc select,#calc textarea").forEach(el=>el.addEventListener("input",renderCalc));
+
+// ---------- STATIC TABLES ----------
+$("#faultGrid").innerHTML=Object.values(FAULTS).map(f=>`<div class="card"><h3 style="margin-top:0">${f.name}</h3>
+ <div><span class="chip">Parts ${f.parts[0]}–${f.parts[1]} ₾${f.partsMac?` (Mac ${f.partsMac[0]}–${f.partsMac[1]})`:""}${f.partsGaming?` (gaming ${f.partsGaming[0]}–${f.partsGaming[1]})`:""}</span><span class="chip">${f.hours[0]}–${f.hours[1]} h</span><span class="chip">Risk: ${f.risk}</span></div>
+ <p style="margin:8px 0 4px"><b>Test:</b> ${f.test}</p>
+ ${f.tools.length?`<b>Tools</b><ul class="tight">${f.tools.map(t=>`<li>${t}</li>`).join("")}</ul>`:""}
+ <b>Knowledge</b><ul class="tight">${f.know.map(t=>`<li>${t}</li>`).join("")}</ul>
+ <details><summary>Bargaining and selling points</summary><ul class="tight">${f.bargain.map(t=>`<li>${t}</li>`).join("")}</ul><ul class="tight">${f.sell.map(t=>`<li class="good">${t}</li>`).join("")}</ul></details></div>`).join("");
+$("#toolTable tbody").innerHTML=TOOLS.map(t=>`<tr><td>${t[0]}</td><td>${t[1]}</td><td>${t[2]}</td></tr>`).join("");
+$("#resaleTable tbody").innerHTML=RESALE.map(r=>`<tr><td>${r[1]}</td><td>${r[2]}–${r[3]}</td><td><span class="chip">${r[4]}</span></td></tr>`).join("");
+$("#newTable tbody").innerHTML=NEWP.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${storeLinks(r[3].split(" / "))}</td></tr>`).join("");
+$("#partsTable tbody").innerHTML=PARTS.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("");
+
+// ---------- NAV ----------
+function show(id){document.querySelectorAll("section").forEach(s=>s.classList.toggle("on",s.id===id));document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.s===id));LS.set("tab",id);window.scrollTo(0,0)}
+document.querySelectorAll("#nav button").forEach(b=>b.addEventListener("click",()=>show(b.dataset.s)));
+// ---------- LOAD ----------
+// On your PC (serve.py) the page reads every scan CSV in deal-finder/ fresh on each load.
+// Online it uses the copy of the latest scan published with the page.
+function useRows(rows,label){
+  const old=LS.get("deals",null); // statuses saved by an older version of this page
+  if(old){old.forEach(d=>{if(d.status&&d.status!=="New"||d.notes){const k=rkey(d);META[k]={status:d.status,notes:d.notes,...(META[k]||{})}}});LS.set("deals",null);try{localStorage.removeItem("deals")}catch(e){}save()}
+  const seen=new Set();
+  deals=[...rows,...LS.get("manual",[])].filter(r=>r&&r.title).filter(r=>{const k=r.key||r.url||r.title;if(seen.has(k))return false;seen.add(k);return true})
+    .map(r=>({status:"New",...r,...(META[rkey(r)]||{})})).filter(d=>!d.hidden);
+  $("#dataNote").textContent=label;
+  renderDeals();
+}
+async function loadData(){
+  try{
+    const r=await fetch("api/listings",{cache:"no-store"}); if(!r.ok) throw 0;
+    const j=await r.json(); SERVER=true;
+    META={...META,...(j.meta||{})}; LS.set("meta",META);
+    if(j.ratings){j.ratings.forEach(x=>{if(x.key&&+x.rating)RATINGS[x.key]={...x,rating:+x.rating,at:x.rated_at}});LS.set("ratings",RATINGS)}
+    useRows(j.rows,`Read ${j.rows.length} listings from ${j.files.join(", ")} just now. Ratings save to deal-finder/ratings.csv.`);
+  }catch(e){
+    // Online copy: Dato's statuses, notes and ratings come with the page; anything you change stays in your browser
+    META={...(window.SCAN_META||{}),...META};
+    (window.SCAN_RATINGS||[]).forEach(x=>{if(x.key&&(+x.rating||x.note)&&!RATINGS[x.key])RATINGS[x.key]={...x,rating:+x.rating||0,at:x.rated_at}});
+    const rows=window.SCAN||[];
+    useRows(rows,rows.length?`Showing the scan from ${window.SCAN_DATE||"the last update"} (${rows.length} listings). This is a read-only copy: changes you make stay in your browser.`:"No listings yet.");
+  }
+}
+renderDeals(); show(LS.get("tab","deals")); loadData();
+</script>
+</body>
+</html>

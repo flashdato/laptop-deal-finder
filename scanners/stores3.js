@@ -1,0 +1,10 @@
+const {open}=require('./lib'); const fs=require('fs');
+(async()=>{ const {b,p}=await open(); const out=JSON.parse(fs.readFileSync('stores.json')).filter(x=>x.store=='Zoommer');
+ const grab=async(store,base,max)=>{ let prev='';
+  for(let pg=1;pg<=max;pg++){ await p.goto(base+(base.includes('?')?'&':'?')+'page='+pg,{waitUntil:'networkidle',timeout:60000}).catch(()=>{}); await p.waitForTimeout(1500);
+   const ps=await p.evaluate(()=>[...document.querySelectorAll('a[href*="-p"] h2[title], a h2[title], a h3[title]')].map(h=>{const a=h.closest('a'); const box=a.parentElement; const pr=(box.innerText.match(/(\d[\d,.]*)\s*₾/)||[])[1]; return {name:h.getAttribute('title'),url:a.href,price:pr?+pr.replace(/,/g,''):null}}));
+   const key=ps.map(x=>x.name).join('|'); console.log(store,pg,ps.length); if(!ps.length||key==prev)break; prev=key; ps.forEach(x=>out.push({store,...x})); } };
+ await grab('Alta','https://alta.ge/notebooks.html',15);
+ await grab('EE','https://ee.ge/en/laptops-c58s',15);
+ fs.writeFileSync('stores.json',JSON.stringify(out)); console.log('total',out.length, out.filter(x=>x.store!='Zoommer').slice(0,3));
+ await b.close();})();

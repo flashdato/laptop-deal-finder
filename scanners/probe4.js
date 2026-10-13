@@ -1,0 +1,11 @@
+const {open}=require('./lib'); const fs=require('fs');
+(async()=>{ const {b,p}=await open();
+ p.on('response', async r => { const u=r.url(); if ((u.includes('mymarket.ge/api')||u.includes('tnet.ge/api')) && !u.includes('similar') && !u.includes('category')) { let t=''; try{t=(await r.text()).slice(0,400)}catch(e){}; console.log(r.request().method(),u,(r.request().postData()||'').slice(0,300),'=>',r.status(),t); }});
+ await p.goto('https://www.mymarket.ge/en/pr/36312560/',{waitUntil:'domcontentloaded',timeout:90000});
+ await p.waitForTimeout(5000);
+ const btn=p.getByText('Show phone number').first();
+ console.log('btn count', await p.getByText('Show phone number').count());
+ await p.evaluate(()=>{document.querySelectorAll('dialog,#cookiescript_injected_wrapper').forEach(e=>e.remove()); const el=[...document.querySelectorAll('span')].find(s=>s.textContent.trim()==='Show phone number'); (el.closest('button')||el).click();});
+ await p.waitForTimeout(6000);
+ const txt=await p.evaluate(()=>document.body.innerText); const m=txt.match(/5\d\d[ \d]{6,10}/g); console.log('phones on page',m);
+ await b.close();})();
