@@ -83,7 +83,7 @@ def merge_rows(rows):
 
     by_key = {}
     for i, r in enumerate(rows):
-        url, seller, price = _norm_url(r.get("url")), _seller(r.get("seller")), (r.get("price") or "").strip()
+        url, seller, price = _norm_url(r.get("url")), _seller(r.get("seller") or r.get("seller_id")), (r.get("price") or "").strip()
         model = _words(r.get("model"))
         specs = _words(r.get("specs"))
         keys = []

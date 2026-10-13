@@ -7,7 +7,7 @@ The public copy has the deal finder, the scanner code, your ratings, statuses an
 Seller names, phone numbers and seller profile links are left out; listing links stay.
 Raw scan dumps (json, html, logs), browser profiles and caches are never copied.
 """
-import csv, glob, os, re, shutil
+import csv, glob, hashlib, os, re, shutil
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(ROOT, "public")
@@ -25,7 +25,12 @@ def clean_csv(src, dst):
     with open(src, encoding="utf-8-sig", newline="") as f:
         rows = list(csv.DictReader(f))
     cols = list(rows[0].keys()) if rows else []
+    if "seller" in cols:  # an anonymous id instead of the name, so duplicate removal still sees reposts
+        cols.append("seller_id")
     for r in rows:
+        if "seller" in r:
+            name = re.sub(r"\s*\(https?://[^)]*\)\s*$", "", r["seller"] or "").strip().lower()
+            r["seller_id"] = hashlib.sha256(("laptops:" + name).encode()).hexdigest()[:10] if name else ""
         for c in cols:
             if c in ("seller", "phone"):
                 r[c] = ""
